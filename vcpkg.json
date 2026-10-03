@@ -8,15 +8,12 @@
         "lz4",
         "directx-headers",
         "protobuf",
-        "gamenetworkingsockets",
         "zlib",
         "libuv",
         {
             "name": "usockets",
             "default-features": false,
-            "features": [
-				"network"
-			]
+            "features": []
         },
         "uwebsockets",
         "simdjson",
