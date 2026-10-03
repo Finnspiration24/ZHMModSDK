@@ -38,12 +38,24 @@ jobs:
             -   name: Build and install debug
                 run: |
                     cmake --preset x64-Debug .
+                    $f = Get-ChildItem _build/x64-Debug -Recurse -Filter steamnetworkingsockets_internal.h | Select-Object -First 1
+                    if (-not $f) { throw "GNS header nicht gefunden" }
+                    $txt = Get-Content $f.FullName -Raw
+                    $new = $txt -replace 'msg\.GetTypeName\(\)\.c_str\(\)', 'std::string( msg.GetTypeName() ).c_str()'
+                    if ($new -eq $txt) { throw "Patch wurde nicht angewendet" }
+                    Set-Content -Path $f.FullName -Value $new -NoNewline
                     cmake --build _build/x64-Debug -j12
                     cmake --install _build/x64-Debug
 
             -   name: Build and install release
                 run: |
                     cmake --preset x64-Release .
+                    $f = Get-ChildItem _build/x64-Release -Recurse -Filter steamnetworkingsockets_internal.h | Select-Object -First 1
+                    if (-not $f) { throw "GNS header nicht gefunden" }
+                    $txt = Get-Content $f.FullName -Raw
+                    $new = $txt -replace 'msg\.GetTypeName\(\)\.c_str\(\)', 'std::string( msg.GetTypeName() ).c_str()'
+                    if ($new -eq $txt) { throw "Patch wurde nicht angewendet" }
+                    Set-Content -Path $f.FullName -Value $new -NoNewline
                     cmake --build _build/x64-Release -j12
                     cmake --install _build/x64-Release
 

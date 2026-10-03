@@ -8,7 +8,6 @@
         "lz4",
         "directx-headers",
         "protobuf",
-        "gamenetworkingsockets",
         "zlib",
         "libuv",
         {

@@ -14,7 +14,7 @@
 #include "Glacier/EntityFactory.h"
 #include <ranges>
 
-#include "backends/imgui_impl_dx12.h"
+#include <imgui_impl_dx12.h>
 #include "Glacier/SGameUpdateEvent.h"
 #include "Glacier/ZCollision.h"
 #include "Glacier/ZPhysics.h"
@@ -64,7 +64,6 @@ void Hitmen::Init()
 {
     Hooks::ZEntitySceneContext_ClearScene->AddDetour(this, &Hitmen::OnClearScene);
     Hooks::ZEntitySceneContext_LoadScene->AddDetour(this, &Hitmen::OnLoadScene);
-    Hooks::ZPlayerRegistry_GetLocalPlayer->AddDetour(this, &Hitmen::GetLocalPlayer);
 }
 
 static void ServerCallback(SteamNetConnectionStatusChangedCallback_t* p_Info)
@@ -578,24 +577,10 @@ void Hitmen::OnDraw3D(IRenderer* p_Renderer)
         }
     }*/
 }
-
-DEFINE_PLUGIN_DETOUR(Hitmen, void, OnLoadScene, ZEntitySceneContext* th, ZSceneData& p_SceneData)
-{
-    // p_SceneData.m_sceneName = "assembly:/_pro/scenes/users/notex/test.entity";
-    //p_SceneData.m_sceneName = "assembly:/_pro/scenes/missions/golden/mission_gecko/scene_gecko_basic.entity";
-    //p_SceneData.m_sceneName = "assembly:/_PRO/Scenes/Missions/TheFacility/_Scene_Mission_Polarbear_Module_002_B.entity";
-    //p_SceneData.m_sceneBricks.clear();
-
-    //p_SceneData.m_sceneName = "assembly:/_PRO/Scenes/Missions/Ancestral/scene_bulldog.entity";
-    //p_SceneData.m_sceneBricks.clear();
-    //p_SceneData.m_sceneBricks.push_back("assembly:/_PRO/scenes/missions/golden/mission_gecko/mission_gecko.brick");
-
-    /*
-     * Loading scene: assembly:/_pro/scenes/missions/golden/mission_gecko/scene_gecko_basic.entity
-+ With brick: assembly:/_PRO/scenes/missions/golden/mission_gecko/mission_gecko.brick
-     */
-    return HookResult<void>(HookAction::Continue());
-}
+  DEFINE_PLUGIN_DETOUR(Hitmen, bool, OnLoadScene, ZEntitySceneContext* th, SSceneInitParameters& p_SceneData)
+  {
+      return HookResult<bool>(HookAction::Continue());
+  }
 
 DEFINE_PLUGIN_DETOUR(Hitmen, void, OnClearScene, ZEntitySceneContext* th, bool p_FullyUnloadScene)
 {
@@ -603,13 +588,6 @@ DEFINE_PLUGIN_DETOUR(Hitmen, void, OnClearScene, ZEntitySceneContext* th, bool p
     m_FirstHitman = {};
     m_SceneLoaded = false;
     return HookResult<void>(HookAction::Continue());
-}
-
-DEFINE_PLUGIN_DETOUR(Hitmen, TEntityRef<ZHitman5>*, GetLocalPlayer, ZPlayerRegistry* th, TEntityRef<ZHitman5>* out)
-{
-    auto s_Result = p_Hook->CallOriginal(th, out);
-
-    return HookResult(HookAction::Return(), out);
 }
 
 DEFINE_ZHM_PLUGIN(Hitmen);
